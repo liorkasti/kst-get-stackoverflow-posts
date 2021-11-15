@@ -3,15 +3,18 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "start": "react-native start",
+    "android": "npx react-native run-android",
+    "ios": "npx react-native run-ios",
+    "start": "npx react-native start",
     "test": "jest",
     "lint": "eslint ."
   },
   "dependencies": {
+    "axios": "^0.24.0",
+    "moment": "^2.29.1",
     "react": "17.0.2",
-    "react-native": "0.66.3"
+    "react-native": "0.66.3",
+    "react-native-paper": "^4.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
