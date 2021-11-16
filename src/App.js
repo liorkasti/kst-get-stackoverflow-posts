@@ -1,17 +1,35 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, StatusBar, FlatList, Modal, Alert } from 'react-native';
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ * @flow strict-local
+ */
+
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, StatusBar, Image, FlatList, Pressable, Modal, } from 'react-native';
 import { ActivityIndicator, Text, TouchableRipple, Switch, Avatar, Searchbar, Card, Title, IconButton } from 'react-native-paper';
 import IconFeather from 'react-native-vector-icons/Feather';
+import axios from 'axios';
 import moment from 'moment';
 
+import useFetch from './utils/useFetch';
 import { THEME } from './utils/constants';
 import { useTheme, useThemeUpdate } from './utils/ThemeContext';
-import useFetch from './utils/useFetch';
 
 const App = () => {
-  const [getUserData, userData, isLoading, errorMessage] = useFetch();
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  // const [getUserData, userData, isLoading, errorMessage] = useFetch();
+  const [userData, setUserData] = useState < Array > ([]);
   const [userID, setUserID] = useState < string > ('');
+  const [requestStatus, setRequestStatus] = useState < string > ('');
 
+  // useEffect(() => {
+  //   getUserData(userID);
+  // }, [userID]);
+
+  // const backgroundStyleColor = isDarkMode ? 'black' : 'white';
+  // const textStyleColor = isDarkMode ? 'white' : 'black';
   const darkTheme = useTheme();
   const toggleTheme = useThemeUpdate();
 
@@ -20,6 +38,20 @@ const App = () => {
     color: darkTheme ? THEME.light : THEME.dark,
     primaryColor: THEME.orange
   }
+
+  const getUserData = async () => {
+    setRequestStatus('');
+    try {
+      const response = await axios.get(`https://api.stackexchange.com/2.2/users/${userID}/questions?order=desc&sort=creation&site=stackoverflow`);
+      // console.log('userData :>> ', response);
+      const result = response.data;
+      setUserData(result.items);
+      // console.log('userData :>> ', userData);
+    } catch (error) {
+      console.error(`user id:${userID} error ` + error);
+      setRequestStatus('fail');
+    }
+  };
 
   const renderItem = ({ item }) => {
     const date = new Date(item.creation_date * 1000).toLocaleDateString("en-US")
@@ -40,7 +72,7 @@ const App = () => {
                 {viewCount ? `  Viewed: ${viewCount} times` : ``}</Text>
             </View>
           </Card.Content>
-          <IconButton style={{ position: 'absolute', left: windowWidth * .75 }} color={THEME.orange} icon='menu-right' size={40} onPress={() => goToWeb(item.link)} />
+          <IconButton style={{ position: 'absolute', left: '75%' }} color={THEME.orange} icon='menu-right' size={40} onPress={() => goToWeb(item.link)} />
         </View>
       </Card>
     );
@@ -86,15 +118,16 @@ const App = () => {
           blurOnSubmit={true}
           onEndEditing={() => getUserData(userID)}
         />
-        {errorMessage || userData.length === 0 && // if errorMessage is not empty or if userData is empty
-          <Text style={{ color: 'red' }}>{errorMessage}</Text>
-        }
 
-        {isLoading && // if isLoading is true
+        {/* {errorMessage || userData.length === 0 && // if errorMessage is not empty or if userData is empty
+          <Text style={{ color: 'red' }}>{errorMessage}</Text>
+        } */}
+
+        {/* {isLoading && // if isLoading is true
           <View style={{ height: windowHeight * .5, justifyContent: 'center', alignItems: 'center' }} >
             <ActivityIndicator color={themeStyles.color} animating={true} />
           </View>
-        }
+        } */}
         {userData[0]?.owner && // if userData[0] is not empty
           <>
             <View style={styles.userDetailsContainer}>

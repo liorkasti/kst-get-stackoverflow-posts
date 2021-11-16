@@ -1,4 +1,4 @@
-import useState from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 
 import { API } from './constants';
@@ -8,14 +8,15 @@ export default () => {
     const [isLoading, setIsLoading] = useState < boolean > (false);
     const [errorMessage, setErrorMessage] = useState < string > ('');
 
+
     const getUserData = async (userID) => {
         if (userID) {
             try {
                 setIsLoading(true)
                 const response = await axios.get(API.baseURL + `${userID}` + API.questions + API.order);
-                const result = await response.data;
+                const result = response.data;
                 setUserData(result.items);
-                console.log('posts :>> ', posts);
+                console.log('userData :>> ', userData);
                 setIsLoading(false)
                 if (result[0].length === 0) { setErrorMessage('User not found!') }
             } catch (error) {
