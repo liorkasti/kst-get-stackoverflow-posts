@@ -7,12 +7,15 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, StatusBar, Image, FlatList, Pressable, Modal, } from 'react-native';
+import { StyleSheet, View, StatusBar, Alert, FlatList, Modal } from 'react-native';
 import { ActivityIndicator, Text, TouchableRipple, Switch, Avatar, Searchbar, Card, Title, IconButton } from 'react-native-paper';
 import IconFeather from 'react-native-vector-icons/Feather';
+import { WebView } from 'react-native-webview';
+import SwitchSelector from 'react-native-switch-selector';
 import axios from 'axios';
 import moment from 'moment';
 
+import { API } from './utils/constants';
 import useFetch from './utils/useFetch';
 import { THEME } from './utils/constants';
 import { useTheme, useThemeUpdate } from './utils/ThemeContext';
@@ -22,14 +25,15 @@ const App = () => {
   // const [getUserData, userData, isLoading, errorMessage] = useFetch();
   const [userData, setUserData] = useState < Array > ([]);
   const [userID, setUserID] = useState < string > ('');
-  const [requestStatus, setRequestStatus] = useState < string > ('');
+  const [isLoading, setIsLoading] = useState < boolean > (false);
+  const [errorMessage, setErrorMessage] = useState < string > ('');
+  const [webLink, setWebLink] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
   // useEffect(() => {
-  //   getUserData(userID);
+  //   getUserData();
   // }, [userID]);
 
-  // const backgroundStyleColor = isDarkMode ? 'black' : 'white';
-  // const textStyleColor = isDarkMode ? 'white' : 'black';
   const darkTheme = useTheme();
   const toggleTheme = useThemeUpdate();
 
@@ -39,17 +43,48 @@ const App = () => {
     primaryColor: THEME.orange
   }
 
+  const SORT_OPTIONS = [
+    { label: 'Creation Date', value: 'CREATION_DATE' },
+    { label: 'Answers Count', value: 'ANSWERS_COUNT' },
+    { label: 'View Count', value: 'VIEW_COUNT' },
+  ];
+
+  const exchangeSort = sortby => {
+    let dataSort;
+    switch (sortby) {
+      case 'CREATION_DATE':
+        dataSort = [...userData].sort((a, b) => {
+          return a.creation_date < b.creation_date;
+        });
+        break;
+      case 'ANSWERS_COUNT':
+        dataSort = [...userData].sort((a, b) => {
+          return a.answer_count < b.answer_count;
+        });
+        break;
+      case 'VIEW_COUNT':
+        dataSort = [...userData].sort((a, b) => {
+          return a.view_count < b.view_count;
+        });
+    }
+    setUserData(dataSort);
+  };
+
   const getUserData = async () => {
-    setRequestStatus('');
-    try {
-      const response = await axios.get(`https://api.stackexchange.com/2.2/users/${userID}/questions?order=desc&sort=creation&site=stackoverflow`);
-      // console.log('userData :>> ', response);
-      const result = response.data;
-      setUserData(result.items);
-      // console.log('userData :>> ', userData);
-    } catch (error) {
-      console.error(`user id:${userID} error ` + error);
-      setRequestStatus('fail');
+    if (userID) {
+      try {
+        setIsLoading(true)
+        const response = await axios.get(API.baseURL + `${userID}` + API.questions + API.order);
+        const result = response.data;
+        setUserData(result.items);
+        console.log('userData :>> ', userData);
+        setIsLoading(false)
+        if (result[0].length === 0) { setErrorMessage('User not found!') }
+      } catch (error) {
+        setIsLoading(false)
+        // console.error('There was an error!', error);
+        setErrorMessage('Something went wrong!');
+      }
     }
   };
 
@@ -77,6 +112,29 @@ const App = () => {
       </Card>
     );
   }
+
+  const goToWeb = link => {
+    Alert.alert(
+      '', 'Are you sure you want to exite to a web page?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          onDismiss: () => { return false }
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            setWebLink(link),
+              setModalVisible(true)
+          },
+          onDismiss: () => { return true }
+        }
+      ],
+      { cancelable: false }
+    );
+  };
 
   return (
     <View style={[styles.background, { backgroundColor: themeStyles.backgroundColor }]}>
@@ -116,21 +174,34 @@ const App = () => {
           value={userID}
           onChangeText={setUserID}
           blurOnSubmit={true}
-          onEndEditing={() => getUserData(userID)}
+          onEndEditing={() => getUserData()}
         />
 
-        {/* {errorMessage || userData.length === 0 && // if errorMessage is not empty or if userData is empty
+        {errorMessage.length > 0 || userData.length === 0 && // if errorMessage is not empty or if userData is empty
           <Text style={{ color: 'red' }}>{errorMessage}</Text>
-        } */}
+        }
 
-        {/* {isLoading && // if isLoading is true
-          <View style={{ height: windowHeight * .5, justifyContent: 'center', alignItems: 'center' }} >
+        {isLoading && // if isLoading is true
+          <View style={{ height: '50%', justifyContent: 'center', alignItems: 'center' }} >
             <ActivityIndicator color={themeStyles.color} animating={true} />
           </View>
-        } */}
-        {userData[0]?.owner && // if userData[0] is not empty
+        }
+
+        {userData[0]?.owner && // if userData is not empty
           <>
             <View style={styles.userDetailsContainer}>
+              <Modal
+                visible={modalVisible}
+                animationType="slide"
+                onRequestClose={() => {
+                  setModalVisible(!modalVisible);
+                }}>
+                <WebView
+                  source={{
+                    uri: webLink,
+                  }}
+                />
+              </Modal>
               <Avatar.Image source={{ uri: userData[0].owner.profile_image, }} size={60} />
               <View style={{ marginLeft: 10 }}>
                 <Text style={{ color: themeStyles.color }}>
@@ -144,6 +215,27 @@ const App = () => {
                   Questions: {userData.length}
                 </Text>
               </View>
+            </View>
+            <View styles={styles.userDetailsContainer}>
+              <Text style={[styles.sortTitle, { color: themeStyles.color, }]}>
+                Sorting By
+              </Text>
+              <SwitchSelector
+                options={SORT_OPTIONS}
+                initial={0}
+                onPress={value => exchangeSort(value)}
+                style={{ width: '80%' }}
+                fontSize={12}
+                backgroundColor={themeStyles.backgroundColor}
+                textStyle={{ color: themeStyles.color }}
+                buttonColor={themeStyles.color}
+                borderRadius={10}
+                borderBottomWidth={2}
+                borderColor={themeStyles.color}
+                selectedTextStyle={{ color: themeStyles.backgroundColor }}
+                hasPadding
+                bold
+              />
             </View>
 
             <FlatList

@@ -34,6 +34,6 @@ Enjoy! thank you.
 
 | No. | Description |
 | ------ | ------ |
-| 1 | Add switch that toggles between light mode and dark mode |
+| 1 | Add switch that toggles between light and dark mode |
 | 2 | use Modal or a Stacked|
 | 3 | use webview |
