@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, StatusBar, FlatList, Modal, Alert } from 'react-native';
 import { ActivityIndicator, Text, TouchableRipple, Switch, Avatar, Searchbar, Card, Title, IconButton } from 'react-native-paper';
-// import IconFeather from 'react-native-vector-icons/Feather';
+import IconFeather from 'react-native-vector-icons/Feather';
 import moment from 'moment';
 
 import { THEME } from './utils/constants';
@@ -52,10 +52,10 @@ const App = () => {
 
       <TouchableRipple>
         <View style={styles.switchContainer}>
-          {/* <IconFeather
+          <IconFeather
             name={darkTheme ? 'moon' : 'sun'}
             style={[styles.icon, { color: darkTheme ? '#fff' : THEME.orange }]}
-          /> */}
+          />
           <Switch
             value={darkTheme}
             color={themeStyles.primaryColor}
