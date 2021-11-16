@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Orientation from 'react-native-orientation-locker';
 
 import App from './App';
 import { ThemeProvider } from './utils/ThemeContext';
 
 export default () => {
-  setTimeout(() => {
-    Orientation.lockToPortrait();
-  });
+
+  useEffect(() => {
+    setTimeout(() => {
+      Orientation.lockToPortrait();
+    });
+  }, []);
+
   return (
     <ThemeProvider>
       <App />

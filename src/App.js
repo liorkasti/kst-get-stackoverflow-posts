@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, StatusBar, Alert, FlatList, Modal } from 'react-native';
+import { StyleSheet, View, StatusBar, Alert, FlatList, Modal, Dimensions } from 'react-native';
 import { ActivityIndicator, Text, TouchableRipple, Switch, Avatar, Searchbar, Card, Title, IconButton } from 'react-native-paper';
 import IconFeather from 'react-native-vector-icons/Feather';
 import { WebView } from 'react-native-webview';
@@ -30,9 +30,9 @@ const App = () => {
   const [webLink, setWebLink] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
-  // useEffect(() => {
-  //   getUserData();
-  // }, [userID]);
+  useEffect(() => {
+    getUserData();
+  }, [userID]);
 
   const darkTheme = useTheme();
   const toggleTheme = useThemeUpdate();
@@ -77,7 +77,7 @@ const App = () => {
         const response = await axios.get(API.baseURL + `${userID}` + API.questions + API.order);
         const result = response.data;
         setUserData(result.items);
-        console.log('userData :>> ', userData);
+        // console.log('userData :>> ', userData);
         setIsLoading(false)
         if (result[0].length === 0) { setErrorMessage('User not found!') }
       } catch (error) {
@@ -107,7 +107,7 @@ const App = () => {
                 {viewCount ? `  Viewed: ${viewCount} times` : ``}</Text>
             </View>
           </Card.Content>
-          <IconButton style={{ position: 'absolute', left: '75%' }} color={THEME.orange} icon='menu-right' size={40} onPress={() => goToWeb(item.link)} />
+          <IconButton style={{ position: 'absolute', left: windowWidth * .75 }} color={THEME.orange} icon='menu-right' size={40} onPress={() => goToWeb(item.link)} />
         </View>
       </Card>
     );
@@ -177,12 +177,15 @@ const App = () => {
           onEndEditing={() => getUserData()}
         />
 
-        {errorMessage.length > 0 || userData.length === 0 && // if errorMessage is not empty or if userData is empty
-          <Text style={{ color: 'red' }}>{errorMessage}</Text>
+        {errorMessage.length > 0 && // if errorMessage is not empty or if userData is empty
+          <Text
+            style={[styles.errorMessage, { color: themeStyles.primaryColor }]}>
+            {errorMessage}
+          </Text>
         }
 
         {isLoading && // if isLoading is true
-          <View style={{ height: '50%', justifyContent: 'center', alignItems: 'center' }} >
+          <View style={{ height: windowHeight * .5, justifyContent: 'center', alignItems: 'center' }} >
             <ActivityIndicator color={themeStyles.color} animating={true} />
           </View>
         }
@@ -224,7 +227,7 @@ const App = () => {
                 options={SORT_OPTIONS}
                 initial={0}
                 onPress={value => exchangeSort(value)}
-                style={{ width: '80%' }}
+                style={{ width: windowWidth * .8 }}
                 fontSize={12}
                 backgroundColor={themeStyles.backgroundColor}
                 textStyle={{ color: themeStyles.color }}
@@ -252,6 +255,9 @@ const App = () => {
   );
 };
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -266,7 +272,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon: {
-    color: '#fff',
+    color: THEME.light,
     textAlign: 'right',
     fontSize: 20
   },
@@ -275,8 +281,14 @@ const styles = StyleSheet.create({
     marginTop: '5%',
     fontSize: 20,
   },
+  errorMessage: {
+    textAlign: 'center',
+    marginTop: '5%',
+    fontWeight: '500',
+    marginBottom: '2%',
+  },
   textInput: {
-    width: '65%',
+    width: windowWidth * .65,
     borderRadius: 10,
     borderBottomWidth: 2,
     margin: '5%',
@@ -285,7 +297,7 @@ const styles = StyleSheet.create({
   },
   userDetailsContainer: {
     flexDirection: 'row',
-    width: '65%',
+    width: windowWidth * .65,
     marginTop: '5%',
     justifyContent: 'space-between',
   },
@@ -300,7 +312,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     flexWrap: 'wrap',
     flexDirection: 'row',
-    width: '90%',
+    width: windowWidth * .9,
     borderBottomWidth: 2,
     borderRadius: 10,
     marginVertical: 10,
@@ -311,14 +323,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   cardContent: {
-    width: '80%',
+    width: windowWidth * .8,
     flexWrap: 'wrap',
     flexDirection: 'row',
     alignItems: 'center',
     alignContent: 'center',
   },
   cardTitle: {
-    width: "75%",
+    width: windowWidth * .75,
     height: 'auto',
     fontSize: 16,
     fontWeight: '300',
@@ -326,7 +338,7 @@ const styles = StyleSheet.create({
   },
   cardSubTitle: {
     flexDirection: 'row',
-    width: '90%',
+    width: windowWidth * .9,
     height: 20,
     fontWeight: '300',
     justifyContent: 'flex-start'
