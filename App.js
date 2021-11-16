@@ -35,7 +35,6 @@ const App = () => {
   };
 
   const renderItem = ({ item }) => {
-    console.log('item :>> ', item);
     const date = new Date(item.creation_date * 1000).toLocaleDateString("en-US")
     const answers = item.answer_count;
     const viewCount = item.view_count;
