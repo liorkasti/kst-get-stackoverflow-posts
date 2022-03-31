@@ -32,6 +32,12 @@ const App = () => {
 
   useEffect(() => {
     getUserData();
+    // if(userID?.length < 1) setErrorMessage('');
+    return () => {
+      setUserData([]);
+      setErrorMessage('');
+      setIsLoading(false);
+    }
   }, [userID]);
 
   const darkTheme = useTheme();
@@ -72,18 +78,20 @@ const App = () => {
 
   const getUserData = async () => {
     if (userID) {
+      
       try {
+        console.log('userID :>> ', userID);
         setIsLoading(true)
         const response = await axios.get(API.baseURL + `${userID}` + API.questions + API.order);
         const result = response.data;
         setUserData(result.items);
-        // console.log('userData :>> ', userData);
-        setIsLoading(false)
-        if (result[0].length === 0) { setErrorMessage('User not found!') }
+        console.log('result :>> ', result);
+        setIsLoading(false);
+        if (!result?.items?.length) { setErrorMessage('User not found!') }
       } catch (error) {
         setIsLoading(false)
         // console.error('There was an error!', error);
-        setErrorMessage('Something went wrong!');
+        setErrorMessage('Something went wrong!\nPlease enter a valid user ID');
       }
     }
   };
@@ -174,7 +182,8 @@ const App = () => {
           value={userID}
           onChangeText={setUserID}
           blurOnSubmit={true}
-          onEndEditing={() => getUserData()}
+          keyboardType={'numeric'}
+          // onEndEditing={() => getUserData()}
         />
 
         {errorMessage.length > 0 && // if errorMessage is not empty or if userData is empty

@@ -31,10 +31,15 @@ A react-native app that use stackexchange.api to get Stack-Overflow posts by ent
 Enjoy! thank you.
 
 ### TODOs:
-
-| No. | Description                                                                   |
-| --- | ----------------------------------------------------------------------------- |
-| 1   | Fix useFetch hook                                                             |
-| 2   | Break down to multiple components                                              |
-| 3   | Fix and Enhance styling bugs like scrolling target after searching once again |
-| 3   | QA - add init test and cover edge cases (platform, data flow)                 |
+ - [x]  Support numeric keyboardType
+ - [ ]  Fix prevState userData is empty (when search cleared)
+ - [ ]  Use useMemo for api
+ - [ ]  Add useEffect on order 
+ - [ ]  Fix useFetch hook
+ - [ ]  Break down App.js to separates files
+ - [ ]  Fix and Enhance styling bugs like scrolling target after searching once agai
+ - [ ]  Add input validation
+ - [ ]  Enhance error handling
+ - [ ]  Add a sate management
+ - [ ]  Add a default UI when no renderItem been found ot initialize
+ - [ ]  QA - add init test and cover edge cases
